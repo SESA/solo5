@@ -22,6 +22,7 @@ TESTDIRS=test_hello test_globals test_ping_serve test_blk \
 UKVM_TESTS=$(subst test, _test_ukvm, $(TESTDIRS))
 VIRTIO_TESTS=$(subst test, _test_virtio, $(TESTDIRS))
 MUEN_TESTS=$(subst test, _test_muen, $(TESTDIRS))
+EBBRT_TESTS=$(subst test, _test_ebbrt, test_hello) # test_hello only
 CLEANS=$(subst test, _clean, $(TESTDIRS))
 
 all: $(UKVM_TESTS) $(VIRTIO_TESTS) $(MUEN_TESTS)
@@ -31,6 +32,8 @@ ukvm: $(UKVM_TESTS)
 virtio: $(VIRTIO_TESTS)
 
 muen: $(MUEN_TESTS)
+
+ebbrt: $(EBBRT_TESTS)
 
 clean: $(CLEANS)
 
@@ -44,6 +47,9 @@ _test_virtio%: force_it
 
 _test_muen%: force_it
 	$(MAKE) -C $(subst _test_muen, test, $@) muen
+
+_test_ebbrt%: force_it
+	$(MAKE) -C $(subst _test_ebbrt, test, $@) ebbrt
 
 _clean_%: force_it
 	$(MAKE) -C $(subst _clean, test, $@) clean

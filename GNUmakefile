@@ -48,6 +48,12 @@ ifeq ($(BUILD_MUEN), yes)
 	$(MAKE) -C tests muen
 endif
 
+.PHONY: ebbrt
+include $(TOP)/kernel/ebbrt/Makefile.ebbrt
+ebbrt:
+	$(MAKE) -C kernel ebbrt 
+	$(MAKE) -C tests ebbrt 
+
 .PHONY: clean
 clean:
 	$(MAKE) -C kernel clean

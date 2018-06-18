@@ -76,15 +76,29 @@ muen/muen-yield.o \
 muen/muen-sinfo.o \
 $(COMMON_COBJS)
 
+EBBRT_COBJS=\
+ebbrt/kernel.o \
+ebbrt/platform.o \
+ebbrt/platform_intr.o \
+ebbrt/time.o \
+ebbrt/platform_lifecycle.o \
+ebbrt/yield.o \
+ebbrt/tscclock.o \
+ebbrt/console.o \
+ebbrt/net.o \
+ebbrt/block.o \
+$(COMMON_COBJS)
+
 HEADERS=\
 kernel.h
 
-all: virtio ukvm
+all: virtio ukvm 
 
-.PHONY: virtio ukvm muen
+.PHONY: virtio ukvm muen ebbrt
 virtio: virtio/solo5.o
 ukvm: ukvm/solo5.o
 muen: muen/solo5.o
+ebbrt: ebbrt/solo5.o
 
 CFLAGS+=-D__SOLO5_KERNEL__
 
@@ -112,6 +126,10 @@ muen/solo5.o: $(MUEN_COBJS) ukvm/solo5.lds
 	$(LD) -r $(LDFLAGS) -o $@ $(MUEN_COBJS)
 	$(OBJCOPY) -w -G solo5_\* -G _start\* $@ $@
 
+ebbrt/solo5.o: $(EBBRT_COBJS) ebbrt/solo5.lds
+	$(LD) -r $(LDFLAGS) -o $@ $(EBBRT_COBJS)
+	$(OBJCOPY) -w -G solo5_\* -G _start\* $@ $@
+
 .PHONY: clean
 clean:
-	$(RM) *.o virtio/*.o ukvm/*.o muen/*.o kernel
+	$(RM) *.o virtio/*.o ukvm/*.o muen/*.o ebbrt/*.o kernel

@@ -28,6 +28,9 @@ virtio:	$(VIRTIO_TARGETS)
 .PHONY: muen
 muen: $(MUEN_TARGETS)
 
+.PHONY: ebbrt
+ebbrt: $(EBBRT_TARGETS)
+
 SOLO5_DIR=$(TOP)/kernel
 UKVM_SRC=$(TOP)/ukvm
 
@@ -66,6 +69,11 @@ endif
 
 $(SOLO5_DIR)/virtio/solo5.o: 
 	$(MAKE) -C $(SOLO5_DIR) virtio
+
+
+%.ebbrt: %.o $(SOLO5_DIR)/ebbrt/solo5.lds $(SOLO5_DIR)/ebbrt/solo5.o
+	$(LD) -T $(SOLO5_DIR)/ebbrt/solo5.lds \
+			 $(LDFLAGS) -o $@ $(SOLO5_DIR)/ebbrt/solo5.o $< $(LDLIBS)
 
 .PHONY: clean ukvm-clean
 clean: ukvm-clean
