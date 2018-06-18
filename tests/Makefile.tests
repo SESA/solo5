@@ -71,9 +71,10 @@ $(SOLO5_DIR)/virtio/solo5.o:
 	$(MAKE) -C $(SOLO5_DIR) virtio
 
 
-%.ebbrt: %.o $(SOLO5_DIR)/ebbrt/solo5.lds $(SOLO5_DIR)/ebbrt/solo5.o
-	$(LD) -T $(SOLO5_DIR)/ebbrt/solo5.lds \
-			 $(LDFLAGS) -o $@ $(SOLO5_DIR)/ebbrt/solo5.o $< $(LDLIBS)
+%.ebbrt: %.c $(HEADERS) $(SOLO5_DIR)/ebbrt/solo5.o
+	$(CC) $(CFLAGS) -T $(SOLO5_DIR)/ebbrt/solo5.lds \
+	 $(SOLO5_DIR)/ebbrt/crt0.S \
+	 $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 .PHONY: clean ukvm-clean
 clean: ukvm-clean

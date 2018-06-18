@@ -51,8 +51,8 @@ endif
 .PHONY: ebbrt
 include $(TOP)/kernel/ebbrt/Makefile.ebbrt
 ebbrt:
-	$(MAKE) -C kernel ebbrt 
-	$(MAKE) -C tests ebbrt 
+	$(MAKE) -C kernel ebbrt CC=$(EBBRT_CC) CFLAGS="$(EBBRT_CFLAGS)" LD=$(EBBRT_LD) 
+	$(MAKE) -C tests ebbrt CC=$(EBBRT_CC) CFLAGS="$(EBBRT_CFLAGS)" LD=$(EBBRT_LD)
 
 .PHONY: clean
 clean:
