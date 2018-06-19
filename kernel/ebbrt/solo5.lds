@@ -25,6 +25,7 @@ SECTIONS {
         }	
 
     /* Code */
+    . = ALIGN(0x1000);
     _stext = .;
 
     .text BLOCK(4K) : ALIGN(4K)

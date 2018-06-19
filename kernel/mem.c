@@ -44,12 +44,13 @@ void mem_init(void)
     extern char _stext[], _etext[], _erodata[], _end[];
     uint64_t mem_size;
 
-    mem_size = platform_mem_size();
+    mem_size = (uint64_t)&_end + platform_mem_size();
     heap_start = ((uint64_t)&_end + PAGE_SIZE - 1) & PAGE_MASK;
     
     /*
      * Cowardly refuse to run with less than 512KB of free memory.
      */
+    log(INFO, "heap_start: %lx mem_size: %lx:\n", heap_start, mem_size);
     if (heap_start + 0x80000 > mem_size)
 	PANIC("Not enough memory", NULL);
 

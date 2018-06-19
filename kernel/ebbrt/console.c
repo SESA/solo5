@@ -18,6 +18,8 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#define EBBRT_PRINTF 0x24fcbb 
+
 #include "kernel.h"
 
 int platform_puts(const char *buf, int n)
@@ -27,7 +29,9 @@ int platform_puts(const char *buf, int n)
     str.data = (char *)buf;
     str.len = n;
 
-    ukvm_do_hypercall(UKVM_HYPERCALL_PUTS, &str);
+  void (*ebbrt_printf)(const char*, ...) = (void (*)(const char*, ...))EBBRT_PRINTF;
+	ebbrt_printf("%s", buf);
+    //ukvm_do_hypercall(UKVM_HYPERCALL_PUTS, &str);
 
     return str.len;
 }

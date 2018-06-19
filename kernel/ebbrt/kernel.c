@@ -18,14 +18,19 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#define EBBRT_PRINTF 0x24fcbb
+
 #include "kernel.h"
 
 void _start(void *arg)
 {
-    static struct solo5_start_info si;
+  void (*ebbrt_printf)(const char*, ...) = (void (*)(const char*, ...))EBBRT_PRINTF;
+	ebbrt_printf("Hello Solo5!\n");
+	ebbrt_printf("My value is %d!\n", 42);
 
+    static struct solo5_start_info si;
     console_init();
-    cpu_init();
+    cpu_init(); //TODO: verify this doesnt break EbbRT
     platform_init(arg);
     si.cmdline = cmdline_parse(platform_cmdline());
 
@@ -35,9 +40,15 @@ void _start(void *arg)
     log(INFO, "____/\\___/ _|\\___/____/\n");
 
     mem_init();
-    time_init(arg);
+    //time_init(arg); // TODO: kludge this hpyercall
     net_init();
 
-    mem_lock_heap(&si.heap_start, &si.heap_size);
+    // maintain locking semantics
+    mem_lock_heap(&si.heap_start, &si.heap_size); 
+
+    // Overwrite the ukvm defaults for heap start and size
+    struct ukvm_boot_info *bi = arg;
+    si.heap_start = bi->kernel_end;
+    si.heap_size = bi->mem_size;
     solo5_exit(solo5_app_main(&si));
 }
