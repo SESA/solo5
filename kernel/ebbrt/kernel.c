@@ -18,37 +18,63 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define EBBRT_PRINTF 0x24fcbb
-
 #include "kernel.h"
+
+void ukvm_do_hypercall(int n, volatile void *arg)
+{
+  void (*ebbrt_printf)(const char*, ...) = (void (*)(const char*, ...))EBBRT_PRINTF;
+
+  volatile struct ukvm_puts *buf = arg;
+  buf->data++;
+  switch(n){
+    case UKVM_HYPERCALL_PUTS: 
+	    ebbrt_printf("%s", buf->data);
+      break;
+    case UKVM_HYPERCALL_WALLTIME:
+    case UKVM_HYPERCALL_POLL:
+    case UKVM_HYPERCALL_BLKINFO:
+    case UKVM_HYPERCALL_BLKWRITE:
+    case UKVM_HYPERCALL_BLKREAD:
+    case UKVM_HYPERCALL_NETINFO:
+    case UKVM_HYPERCALL_NETWRITE:
+    case UKVM_HYPERCALL_NETREAD:
+    case UKVM_HYPERCALL_HALT:
+      ebbrt_printf("\nHalting Solo5. Goodbye!\n"); 
+      while(1);
+    case UKVM_HYPERCALL_MAX:
+      ebbrt_printf("Error: Unsupported hypercall #%d\n", n); 
+      solo5_abort();
+  }
+}
 
 void _start(void *arg)
 {
-  void (*ebbrt_printf)(const char*, ...) = (void (*)(const char*, ...))EBBRT_PRINTF;
-	ebbrt_printf("Hello Solo5!\n");
-	ebbrt_printf("My value is %d!\n", 42);
+  void (*ebbrt_printf)(const char *, ...) =
+      (void (*)(const char *, ...))EBBRT_PRINTF;
+  ebbrt_printf("Hello Solo5!\n");
+  ebbrt_printf("My value is %d!\n", 42);
 
-    static struct solo5_start_info si;
-    console_init();
-    cpu_init(); //TODO: verify this doesnt break EbbRT
-    platform_init(arg);
-    si.cmdline = cmdline_parse(platform_cmdline());
+  static struct solo5_start_info si;
+  console_init();
+  cpu_init(); // TODO: verify this doesnt break EbbRT
+  platform_init(arg);
+  si.cmdline = cmdline_parse(platform_cmdline());
 
-    log(INFO, "            |      ___|\n");
-    log(INFO, "  __|  _ \\  |  _ \\ __ \\\n");
-    log(INFO, "\\__ \\ (   | | (   |  ) |\n");
-    log(INFO, "____/\\___/ _|\\___/____/\n");
+  log(INFO, "            |      ___|\n");
+  log(INFO, "  __|  _ \\  |  _ \\ __ \\\n");
+  log(INFO, "\\__ \\ (   | | (   |  ) |\n");
+  log(INFO, "____/\\___/ _|\\___/____/\n");
 
-    mem_init();
-    //time_init(arg); // TODO: kludge this hpyercall
-    net_init();
+  mem_init();
+  time_init(arg); // TODO: kludge this hpyercall
+  net_init();
 
-    // maintain locking semantics
-    mem_lock_heap(&si.heap_start, &si.heap_size); 
+  // maintain locking semantics
+  mem_lock_heap(&si.heap_start, &si.heap_size);
 
-    // Overwrite the ukvm defaults for heap start and size
-    struct ukvm_boot_info *bi = arg;
-    si.heap_start = bi->kernel_end;
-    si.heap_size = bi->mem_size;
-    solo5_exit(solo5_app_main(&si));
+  // Overwrite the ukvm defaults for heap start and size
+  struct ukvm_boot_info *bi = arg;
+  si.heap_start = bi->kernel_end;
+  si.heap_size = bi->mem_size;
+  solo5_exit(solo5_app_main(&si));
 }
