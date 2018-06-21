@@ -20,12 +20,13 @@
 
 #include "kernel.h"
 
+// hypercall kludge
+void (*ebbrt_printf)(const char *, ...);
+
 void ukvm_do_hypercall(int n, volatile void *arg)
 {
-  void (*ebbrt_printf)(const char*, ...) = (void (*)(const char*, ...))EBBRT_PRINTF;
 
   volatile struct ukvm_puts *buf = arg;
-  buf->data++;
   switch(n){
     case UKVM_HYPERCALL_PUTS: 
 	    ebbrt_printf("%s", buf->data);
@@ -47,14 +48,20 @@ void ukvm_do_hypercall(int n, volatile void *arg)
   }
 }
 
+void hypercall_init(void *arg)
+{
+  struct ukvm_boot_info *bi = arg;
+  assert(bi->cpu.ebbrt_printf_addr != 0);
+  ebbrt_printf= (void (*)(const char *, ...))bi->cpu.ebbrt_printf_addr;
+  ebbrt_printf("Hello Solo5!\n");
+}
+
 void _start(void *arg)
 {
-  void (*ebbrt_printf)(const char *, ...) =
-      (void (*)(const char *, ...))EBBRT_PRINTF;
-  ebbrt_printf("Hello Solo5!\n");
-  ebbrt_printf("My value is %d!\n", 42);
 
   static struct solo5_start_info si;
+
+  hypercall_init(arg); 
   console_init();
   cpu_init(); // TODO: verify this doesnt break EbbRT
   platform_init(arg);

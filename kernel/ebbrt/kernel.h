@@ -21,13 +21,37 @@
 #ifndef __UKVM_KERNEL_H__
 #define __UKVM_KERNEL_H__
 
-#define EBBRT_PRINTF 0x24fcbb 
-
 #include "../kernel.h"
 
-//#include "ukvm_guest.h"
-
 #    define UKVM_GUEST_PTR(T) T
+
+/*
+ * Arch-dependent part of struct ukvm_boot_info.
+ */
+struct ukvm_cpu_boot_info {
+    uint64_t tsc_freq;                  /* TSC frequency in Hz */
+    uint64_t ebbrt_printf_addr;
+};
+
+/*
+ * A pointer to this structure is passed by the monitor as the sole argument to
+ * the guest entrypoint.
+ */
+struct ukvm_boot_info {
+    uint64_t mem_size;                  /* Memory size in bytes */
+    uint64_t kernel_end;                /* Address of end of kernel */
+    UKVM_GUEST_PTR(char *) cmdline;     /* Address of command line (C string) */
+    struct ukvm_cpu_boot_info cpu;      /* Arch-dependent part (see above) */
+};
+/*
+ * Maximum size of guest command line, including the string terminator.
+ */
+#define UKVM_CMDLINE_SIZE 8192
+
+/*
+ * Canonical list of hypercalls supported by all monitor modules. Actual calls
+ * supported at run time depend on module configuration at build time.
+ */
 enum ukvm_hypercall {
     /* UKVM_HYPERCALL_RESERVED=0 */
     UKVM_HYPERCALL_WALLTIME=1,
@@ -152,22 +176,6 @@ struct ukvm_halt {
 
     /* IN */
     int exit_status;
-};
-
-/*
- * A pointer to this structure is passed by the monitor as the sole argument to
- * the guest entrypoint.
- */
-struct ukvm_cpu_boot_info {
-    uint64_t tsc_freq;
-    uint64_t ebbrt_printf_addr;
-};
-
-struct ukvm_boot_info {
-    uint64_t mem_size;                  /* Memory size in bytes */
-    uint64_t kernel_end;                /* Address of end of kernel */
-    UKVM_GUEST_PTR(char *) cmdline;     /* Address of command line (C string) */
-    struct ukvm_cpu_boot_info cpu;      /* Arch-dependent part (see above) */
 };
 
 void ukvm_do_hypercall(int n, volatile void *arg);
