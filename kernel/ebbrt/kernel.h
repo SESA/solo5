@@ -159,6 +159,7 @@ struct ukvm_halt {
  * the guest entrypoint.
  */
 struct ukvm_cpu_boot_info {
+    uint64_t tsc_freq;
     uint64_t ebbrt_printf_addr;
 };
 

@@ -1,5 +1,6 @@
 # NOTE: The EbbRT toolchain is required to build Om
 #       Set EBBRT_SYSROOT env variable to its (default: /opt/ebbrt)
+include $(TOP)/Makefile.common
 EBBRT_SYSROOT ?= $(abspath /opt/ebbrt)
 EBBRT_BIN_DIR=${EBBRT_SYSROOT}/usr/bin
 EBBRT_CC:=${EBBRT_BIN_DIR}/x86_64-pc-ebbrt-gcc
@@ -8,5 +9,4 @@ EBBRT_LD:=${EBBRT_BIN_DIR}/x86_64-pc-ebbrt-ld
 $(EBBRT_SYSROOT): # verify we have an EbbRT toolchain
 	$(error EBBRT_SYSROOT is undefined and can not be located)
 
-EBBRT_CFLAGS:=-nostdinc -fno-stack-protector -ffreestanding -mno-red-zone -mno-sse -mno-mmx -mno-aes -mno-avx -isystem /home/jmcadden/solo5/include-host -std=gnu99 -Wall -Wextra -Werror -O2 -g -D__SOLO5_KERNEL__ -I/home/jmcadden/solo5/kernel -fPIC -nostdlib
-EBBRT_LDFLAGS:= #${LDFLAGS}
+EBBRT_CFLAGS:=${CFLAGS} -O0 -mno-sse -mno-mmx -mno-aes -mno-avx -D__SOLO5_KERNEL__ -I$(TOP)/kernel -fPIC -nostdlib
