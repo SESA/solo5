@@ -1,89 +1,123 @@
+/* OUTPUT_FORMAT("elf64-x86-64", "elf64-x86-64", "elf64-x86-64") */
+/* OUTPUT_ARCH(i386:x86-64) */
 ENTRY(_start)
+
 sv_start = 0xFFFFC00000000000;
 sv_last  = 0xFFFFC07FFFFFFFFF;
 
-SECTIONS {
-	  . = sv_start ;  
-    .reg :
-	  {	
-	      QUAD(0); /* r0 */
-	      QUAD(0); /* r1 */
-	      QUAD(0); /* r2 */
-	      QUAD(0); /* r3 */
-	      QUAD(0); /* r4 */
-	      QUAD(0); /* r5 */
-	      QUAD(0); /* r6 */
-	      QUAD(0); /* r7 */
-	      QUAD(0); /* r8 */
-	      QUAD(0); /* r9 */
-	      QUAD(0); /* r10 */
-	      QUAD(0); /* r11 */
-	      QUAD(0); /* r12 */
-	      QUAD(0); /* r13 */
-	      QUAD(0); /* r14 */
-	      QUAD(0); /* r15 */
-        }	
+SECTIONS
+{
+	/* . = 0x100000; */
+	. = sv_start ;  
+	_begin = . ;
 
-    /* Code */
-    . = ALIGN(0x1000);
-    _stext = .;
+	.bootstrap :
+	{
+		*(.bootstrap)
+	}
 
-    .text BLOCK(4K) : ALIGN(4K)
-    {
-        *(.text)
-        *(.text.*)
-    }
+	. = ALIGN(0x1000);
 
-    . = ALIGN(0x1000);
-    _etext = .;
+        /* Code */
+	_stext = . ;
 
-    /* Read-only data */
-	  .rodata BLOCK(4K) : ALIGN(4K)
-    {
-        *(.rodata)
-        *(.rodata.*)
-    }
-    .eh_frame_hdr ALIGN(4K) : {
+	.text :
+	AT (ADDR(.text))
+	{
+		*(.text)
+		*(.text.*)
+		*(.stub)
+		*(.note*)
+	}
+	_etext = . ;
+
+  . = ALIGN(0x1000);
+	.rodata :
+	/* AT (LOADADDR(.text) + (ADDR(.rodata) - ADDR(.text))) */
+	AT (ADDR(.rodata))
+	{
+		*(.rodata)
+		*(.rodata.*)
+	}
+
+    _erodata = .;
+
+        .eh_frame_hdr ALIGN(4K) : {
         *(.eh_frame_hdr)
-    }
-    .eh_frame ALIGN(4) : ONLY_IF_RO {
+        }
+
+        .eh_frame ALIGN(4) : ONLY_IF_RO {
         __eh_frame_start = .;
         *(.eh_frame)
         QUAD(0);
-    }
+        }
 
-    . = ALIGN(0x1000);
-    _erodata = .;
+. = ALIGN(0x1000);
+	.initfini :
+	AT (LOADADDR(.text) + (ADDR(.initfini) - ADDR(.text)))
+	{
+		__init_array_start = . ;
+		*(SORT_BY_INIT_PRIORITY(.init_array.*))
+		*(SORT_BY_INIT_PRIORITY(.ctors*))
+		*(.init_array)
+		__init_array_end = . ;
+		__fini_array_start = . ;
+		*(SORT_BY_INIT_PRIORITY(.fini_array.*))
+		*(SORT_BY_INIT_PRIORITY(.dtors*))
+		*(.fini_array)
+		__fini_array_end = . ;
+	}
 
-    /* Read-write data (initialized) */
-    .got BLOCK(4K) : ALIGN(4K)
-    {
-        *(.got.plt)
-        *(.got)
-    }
+	. = ALIGN(0x1000);
 
-    /* TODO(jmcadden): check if section is required */
-    .got.plt BLOCK(4k) : ALIGN(4K)
-    {
-      *(.got.plt.*)
-    }
-	  .data BLOCK(4K) : ALIGN(4K)
-    {
-        *(.data)
-        *(.data.*)
-    }
+	_data_start = .;
+	.data :
+	AT (LOADADDR(.text) + (ADDR(.data) - ADDR(.text)))
+	{
+		*(.data)
+		*(.data.*)
+	}
+	. = ALIGN(0x1000);
+	.tdata : {
+		_tdata_start = . ;
+		*(.tdata)
+		_tdata_end = . ;
+	}
+	_edata = . ;
+	. = ALIGN(0x1000);
+	.tbss : {
+		_tbss_start = . ;
+		*(.tbss)
+		_tbss_end = . ;
+	}
 
-    . = ALIGN(0x1000);
-    _edata = .;
+.got BLOCK(4K) : ALIGN(4K)
+{
+*(.got)
+}
 
-    /* Read-write data (uninitialized) */
-	  .bss BLOCK(4K) : ALIGN(4K)
-    {
-        *(.bss)
-        *(COMMON)
-    }
+  .got.plt BLOCK(4k) : ALIGN(4K)
+  {
+*(.got.plt.*)
+}
 
-    . = ALIGN(0x1000);
-    _ebss = .;
-    _end = .;
+. = ALIGN(0x1000);
+	__bss_start = . ;
+	.bss :
+	AT (LOADADDR(.text) + (ADDR(.bss) - ADDR(.text)))
+	{
+		*(.bss)
+		*(.bss.*)
+		*(COMMON)
+	}
+	. = ALIGN(0x1000);
+	.lbss :
+	AT (LOADADDR(.text) + (ADDR(.lbss) - ADDR(.text)))
+	{
+		*(.lbss)
+		*(.lbss.*)
+		*(LARGE_COMMON)
+	}
+	_ebss = . ;
+	_end = . ;
 }

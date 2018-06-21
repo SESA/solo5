@@ -9,4 +9,4 @@ EBBRT_LD:=${EBBRT_BIN_DIR}/x86_64-pc-ebbrt-ld
 $(EBBRT_SYSROOT): # verify we have an EbbRT toolchain
 	$(error EBBRT_SYSROOT is undefined and can not be located)
 
-EBBRT_CFLAGS:=${CFLAGS} -O0 -mno-sse -mno-mmx -mno-aes -mno-avx -D__SOLO5_KERNEL__ -I$(TOP)/kernel -fPIC -nostdlib
+EBBRT_CFLAGS:=${CFLAGS} -mno-sse -mno-mmx -mno-aes -mno-avx -D__SOLO5_KERNEL__ -I$(TOP)/kernel -fPIC -nostdlib
