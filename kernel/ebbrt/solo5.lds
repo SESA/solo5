@@ -1,6 +1,6 @@
 /* OUTPUT_FORMAT("elf64-x86-64", "elf64-x86-64", "elf64-x86-64") */
 /* OUTPUT_ARCH(i386:x86-64) */
-ENTRY(_start)
+ENTRY(_svEntryPt)
 
 sv_start = 0xFFFFC00000000000;
 sv_last  = 0xFFFFC07FFFFFFFFF;
