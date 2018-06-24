@@ -63,7 +63,7 @@ void _start(void *arg)
 
   hypercall_init(arg); 
   console_init();
-  cpu_init(); // TODO: verify this doesnt break EbbRT
+  /* cpu_init(); // TODO: verify this doesnt break EbbRT */
   platform_init(arg);
   si.cmdline = cmdline_parse(platform_cmdline());
 
@@ -73,7 +73,7 @@ void _start(void *arg)
   log(INFO, "____/\\___/ _|\\___/____/\n");
 
   mem_init();
-  time_init(arg); // TODO: kludge this hpyercall
+  /* time_init(arg); // TODO: kludge this hypercall */
   net_init();
 
   // maintain locking semantics
@@ -83,5 +83,7 @@ void _start(void *arg)
   struct ukvm_boot_info *bi = arg;
   si.heap_start = bi->kernel_end;
   si.heap_size = bi->mem_size;
-  solo5_exit(solo5_app_main(&si));
+  /* solo5_exit(solo5_app_main(&si)); */
+  solo5_app_main(&si);
+
 }
