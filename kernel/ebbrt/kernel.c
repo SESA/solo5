@@ -29,7 +29,8 @@ void ukvm_do_hypercall(int n, volatile void *arg)
   volatile struct ukvm_puts *buf = arg;
   switch(n){
     case UKVM_HYPERCALL_PUTS: 
-	    ebbrt_printf("%s", buf->data);
+      for(unsigned int i = 0; i < buf->len; i++)
+        ebbrt_printf("%c", buf->data[i]);
       break;
     case UKVM_HYPERCALL_WALLTIME:
     case UKVM_HYPERCALL_POLL:
