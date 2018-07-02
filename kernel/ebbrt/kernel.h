@@ -32,6 +32,7 @@ struct ukvm_cpu_boot_info {
     uint64_t tsc_freq;                  /* TSC frequency in Hz */
     uint64_t ebbrt_printf_addr;
     uint64_t ebbrt_walltime_addr;
+    uint64_t ebbrt_exit_addr;
 };
 
 /*
@@ -199,5 +200,6 @@ void process_bootinfo(void *arg);
  */
   void (*ebbrt_printf)(const char *, ...);
   uint64_t (*ebbrt_walltime)();
+  void (*ebbrt_exit)();
 
 #endif

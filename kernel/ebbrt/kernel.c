@@ -42,7 +42,7 @@ void ukvm_do_hypercall(int n, volatile void *arg)
     case UKVM_HYPERCALL_NETREAD:
     case UKVM_HYPERCALL_HALT:
       ebbrt_printf("\nHalting Solo5. Goodbye!\n"); 
-      while(1);
+      ebbrt_exit();
     case UKVM_HYPERCALL_MAX:
       ebbrt_printf("Error: Unsupported hypercall #%d\n", n); 
       solo5_abort();
@@ -60,6 +60,10 @@ void hypercall_init(void *arg)
   assert(bi->cpu.ebbrt_walltime_addr != 0);
   ebbrt_walltime= (uint64_t (*)())bi->cpu.ebbrt_walltime_addr;
   ebbrt_printf("EbbRT walltime is %llu\n", ebbrt_walltime());
+  // Exit call
+  assert(bi->cpu.ebbrt_exit_addr != 0);
+  ebbrt_printf("EbbRT exit point is %llu\n", bi->cpu.ebbrt_exit_addr);
+  ebbrt_exit = (void (*)())bi->cpu.ebbrt_exit_addr;
 }
 
 void _start(void *arg)
