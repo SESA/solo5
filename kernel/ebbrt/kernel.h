@@ -31,6 +31,7 @@
 struct ukvm_cpu_boot_info {
     uint64_t tsc_freq;                  /* TSC frequency in Hz */
     uint64_t ebbrt_printf_addr;
+    uint64_t ebbrt_walltime_addr;
 };
 
 /*
@@ -190,4 +191,13 @@ int tscclock_init(uint64_t tsc_freq);
 uint64_t tscclock_epochoffset(void);
 
 void process_bootinfo(void *arg);
+
+
+
+/*
+ * EbbRT hypercall kludges
+ */
+  void (*ebbrt_printf)(const char *, ...);
+  uint64_t (*ebbrt_walltime)();
+
 #endif

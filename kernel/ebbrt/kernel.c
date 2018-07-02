@@ -20,19 +20,19 @@
 
 #include "kernel.h"
 
-// hypercall kludge
-void (*ebbrt_printf)(const char *, ...);
-
 void ukvm_do_hypercall(int n, volatile void *arg)
 {
 
-  volatile struct ukvm_puts *buf = arg;
+  volatile struct ukvm_puts *puts_buf = arg;
+  volatile struct ukvm_walltime *wt = arg;
   switch(n){
     case UKVM_HYPERCALL_PUTS: 
-      for(unsigned int i = 0; i < buf->len; i++)
-        ebbrt_printf("%c", buf->data[i]);
+      for(unsigned int i = 0; i < puts_buf->len; i++)
+        ebbrt_printf("%c", puts_buf->data[i]);
       break;
     case UKVM_HYPERCALL_WALLTIME:
+      wt->nsecs = ebbrt_walltime();
+      break;
     case UKVM_HYPERCALL_POLL:
     case UKVM_HYPERCALL_BLKINFO:
     case UKVM_HYPERCALL_BLKWRITE:
@@ -52,9 +52,14 @@ void ukvm_do_hypercall(int n, volatile void *arg)
 void hypercall_init(void *arg)
 {
   struct ukvm_boot_info *bi = arg;
+  // Setup printf hypercall
   assert(bi->cpu.ebbrt_printf_addr != 0);
   ebbrt_printf= (void (*)(const char *, ...))bi->cpu.ebbrt_printf_addr;
   ebbrt_printf("Hello Solo5!\n");
+  // Setup walltime hypercall
+  assert(bi->cpu.ebbrt_walltime_addr != 0);
+  ebbrt_walltime= (uint64_t (*)())bi->cpu.ebbrt_walltime_addr;
+  ebbrt_printf("EbbRT walltime is %llu\n", ebbrt_walltime());
 }
 
 void _start(void *arg)
@@ -74,7 +79,7 @@ void _start(void *arg)
   log(INFO, "____/\\___/ _|\\___/____/\n");
 
   mem_init();
-  /* time_init(arg); // TODO: kludge this hypercall */
+  time_init(arg); 
   net_init();
 
   // maintain locking semantics
