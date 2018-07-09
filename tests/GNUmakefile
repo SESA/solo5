@@ -22,7 +22,7 @@ TESTDIRS=test_hello test_globals test_ping_serve test_blk \
 UKVM_TESTS=$(subst test, _test_ukvm, $(TESTDIRS))
 VIRTIO_TESTS=$(subst test, _test_virtio, $(TESTDIRS))
 MUEN_TESTS=$(subst test, _test_muen, $(TESTDIRS))
-EBBRT_TESTS=$(subst test, _test_ebbrt, test_hello) # test_hello only
+EBBRT_TESTS=$(subst test, _test_ebbrt, $(TESTDIRS)) 
 CLEANS=$(subst test, _clean, $(TESTDIRS))
 
 all: $(UKVM_TESTS) $(VIRTIO_TESTS) $(MUEN_TESTS)

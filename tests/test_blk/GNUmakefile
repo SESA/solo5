@@ -18,6 +18,7 @@
 
 UKVM_TARGETS=test_blk.ukvm ukvm-bin
 VIRTIO_TARGETS=test_blk.virtio
+EBBRT_TARGETS=test_blk.ebbrt
 UKVM_MODULES=blk
 
 include ../Makefile.tests

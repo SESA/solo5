@@ -19,6 +19,7 @@
 UKVM_TARGETS=test_abort.ukvm ukvm-bin
 VIRTIO_TARGETS=test_abort.virtio
 MUEN_TARGETS=test_abort.muen
+EBBRT_TARGETS=test_abort.ebbrt
 UKVM_MODULES=dumpcore
 
 include ../Makefile.tests

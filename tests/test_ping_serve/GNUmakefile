@@ -19,6 +19,7 @@
 UKVM_TARGETS=test_ping_serve.ukvm ukvm-bin
 VIRTIO_TARGETS=test_ping_serve.virtio
 MUEN_TARGETS=test_ping_serve.muen
+EBBRT_TARGETS=test_ping_serve.ebbrt
 UKVM_MODULES=net
 
 include ../Makefile.tests

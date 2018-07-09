@@ -19,6 +19,7 @@
 UKVM_TARGETS=test_quiet.ukvm ukvm-bin
 VIRTIO_TARGETS=test_quiet.virtio
 MUEN_TARGETS=test_quiet.muen
+EBBRT_TARGETS=test_quiet.ebbrt
 UKVM_MODULES=
 
 include ../Makefile.tests
