@@ -239,7 +239,9 @@ static void send_garp(void)
         puts("Could not send GARP packet\n");
 }
 
+#ifndef __ebbrt__
 static const solo5_time_t NSEC_PER_SEC = 1000000000ULL;
+#endif
 
 static void ping_serve(int verbose, int limit)
 {
