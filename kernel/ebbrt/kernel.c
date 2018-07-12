@@ -33,6 +33,10 @@ void ukvm_do_hypercall(int n, volatile void *arg)
     case UKVM_HYPERCALL_WALLTIME:
       wt->nsecs = ebbrt_walltime();
       break;
+    case UKVM_HYPERCALL_HALT:
+      ebbrt_printf("\nHalting Solo5. Goodbye!\n"); 
+      ebbrt_exit();
+      break;
     case UKVM_HYPERCALL_POLL:
     case UKVM_HYPERCALL_BLKINFO:
     case UKVM_HYPERCALL_BLKWRITE:
@@ -40,9 +44,6 @@ void ukvm_do_hypercall(int n, volatile void *arg)
     case UKVM_HYPERCALL_NETINFO:
     case UKVM_HYPERCALL_NETWRITE:
     case UKVM_HYPERCALL_NETREAD:
-    case UKVM_HYPERCALL_HALT:
-      ebbrt_printf("\nHalting Solo5. Goodbye!\n"); 
-      ebbrt_exit();
     case UKVM_HYPERCALL_MAX:
       ebbrt_printf("Error: Unsupported hypercall #%d\n", n); 
       solo5_abort();
