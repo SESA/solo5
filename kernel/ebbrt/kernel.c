@@ -22,49 +22,20 @@
 
 void ukvm_do_hypercall(int n, volatile void *arg)
 {
-
-  volatile struct ukvm_puts *puts_buf = arg;
-  volatile struct ukvm_walltime *wt = arg;
-  switch(n){
-    case UKVM_HYPERCALL_PUTS: 
-      for(unsigned int i = 0; i < puts_buf->len; i++)
-        ebbrt_printf("%c", puts_buf->data[i]);
-      break;
-    case UKVM_HYPERCALL_WALLTIME:
-      wt->nsecs = ebbrt_walltime();
-      break;
-    case UKVM_HYPERCALL_HALT:
-      ebbrt_printf("\nHalting Solo5. Goodbye!\n"); 
-      ebbrt_exit();
-      break;
-    case UKVM_HYPERCALL_POLL:
-    case UKVM_HYPERCALL_BLKINFO:
-    case UKVM_HYPERCALL_BLKWRITE:
-    case UKVM_HYPERCALL_BLKREAD:
-    case UKVM_HYPERCALL_NETINFO:
-    case UKVM_HYPERCALL_NETWRITE:
-    case UKVM_HYPERCALL_NETREAD:
-    case UKVM_HYPERCALL_MAX:
-      ebbrt_printf("Error: Unsupported hypercall #%d\n", n); 
-      solo5_abort();
+  int (*hypercall_)(volatile void *);
+  hypercall_ = (int (*)(volatile void *))(hypercall_table[n]);
+  if (hypercall_(arg)) {
+    solo5_abort();
   }
 }
 
+/* Setup the hypercall pointer table */
 void hypercall_init(void *arg)
 {
   struct ukvm_boot_info *bi = arg;
-  // Setup printf hypercall
-  assert(bi->cpu.ebbrt_printf_addr != 0);
-  ebbrt_printf= (void (*)(const char *, ...))bi->cpu.ebbrt_printf_addr;
-  ebbrt_printf("Hello Solo5!\n");
-  // Setup walltime hypercall
-  assert(bi->cpu.ebbrt_walltime_addr != 0);
-  ebbrt_walltime= (uint64_t (*)())bi->cpu.ebbrt_walltime_addr;
-  ebbrt_printf("EbbRT walltime is %llu\n", ebbrt_walltime());
-  // Exit call
-  assert(bi->cpu.ebbrt_exit_addr != 0);
-  ebbrt_printf("EbbRT exit point is %llu\n", bi->cpu.ebbrt_exit_addr);
-  ebbrt_exit = (void (*)())bi->cpu.ebbrt_exit_addr;
+  hypercall_table[0] = bi->cpu.hypercall_ptr[UKVM_HYPERCALL_HALT];
+  for (uint8_t i = 1; i < UKVM_HYPERCALL_MAX; ++i)
+    hypercall_table[i] = bi->cpu.hypercall_ptr[i];
 }
 
 void _start(void *arg)
