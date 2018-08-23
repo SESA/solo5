@@ -190,6 +190,7 @@ struct ukvm_halt {
  */
 struct ukvm_cpu_boot_info {
     uint64_t tsc_freq;                  /* TSC frequency in Hz */
+    uint64_t tsc_step;                  /* Monotonic clock step (ns) */
     uint64_t hypercall_ptr[UKVM_HYPERCALL_MAX];
 };
 /*

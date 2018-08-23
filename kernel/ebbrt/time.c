@@ -20,14 +20,28 @@
 
 #include "kernel.h"
 
+static uint64_t prev_time = 0;
+static uint64_t clock_step = 300000;
+
 void time_init(struct ukvm_boot_info *bi)
 {
     assert(tscclock_init(bi->cpu.tsc_freq) == 0);
+
+		// set the clock step 
+    if (bi->cpu.tsc_step > 0) {
+      clock_step = bi->cpu.tsc_step;
+    }
 }
 
 uint64_t solo5_clock_monotonic(void)
 {
-    return tscclock_monotonic();
+  // manually increment the clock after the initial tsc read
+  if (!prev_time)
+    prev_time = tscclock_monotonic();
+  else
+    prev_time += clock_step;
+
+  return prev_time;
 }
 
 /* return wall time in nsecs */
