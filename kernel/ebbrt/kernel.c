@@ -19,14 +19,26 @@
  */
 
 #include "kernel.h"
+#define USE_SYSCALL
 
 void ukvm_do_hypercall(int n, volatile void *arg)
 {
+
+#ifdef USE_SYSCALL
+  __asm__ __volatile__("mov %0, %%edi" ::"r"(n));
+  __asm__ __volatile__("movq %0, %%rsi" ::"r"(arg));
+  __asm__ __volatile__("syscall");
+
+#else
+#error
   int (*hypercall_)(volatile void *);
   hypercall_ = (int (*)(volatile void *))(hypercall_table[n]);
   if (hypercall_(arg)) {
     solo5_abort();
   }
+
+#endif
+
 }
 
 /* Setup the hypercall pointer table */
@@ -43,7 +55,10 @@ void _start(void *arg)
 
   static struct solo5_start_info si;
 
-  hypercall_init(arg); 
+#ifndef USE_SYSCALL
+  hypercall_init(arg);
+#endif
+
   console_init();
   platform_init(arg);
   si.cmdline = cmdline_parse(platform_cmdline());
